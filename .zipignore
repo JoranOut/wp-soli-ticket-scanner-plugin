@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/**
+**/node_modules/**
+
+# Config files
+package.json
+package-lock.json
+.wp-env.json
+.wp-env-setup.sh
+.gitignore
+.zipignore
+playwright.config.js
+tailwind.config.js
+build.js
+
+# Source files
+src/**
+
+# Build scripts
+publish.js
+
+# Tests
+e2e/**
+tests/**
+test-results/**
+playwright-report/**
+artifacts/**
+
+# Documentation (dev only)
+CLAUDE.md
+
+# GitHub
+.github/**
+
+# Build output
+*.zip

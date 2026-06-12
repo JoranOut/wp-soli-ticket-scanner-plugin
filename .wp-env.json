@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/wp-env.json",
+  "core": null,
+  "phpVersion": "8.2",
+  "plugins": ["."],
+  "themes": [],
+  "env": {
+    "development": {
+      "config": {
+        "WP_DEBUG": true,
+        "WP_DEBUG_DISPLAY": true,
+        "WP_DEBUG_LOG": true,
+        "WP_MEMORY_LIMIT": "512M",
+        "WP_SITEURL": "http://localhost:8888",
+        "WP_HOME": "http://localhost:8888"
+      }
+    },
+    "tests": {
+      "config": {
+        "WP_DEBUG": true,
+        "WP_DEBUG_DISPLAY": true,
+        "WP_DEBUG_LOG": true,
+        "WP_MEMORY_LIMIT": "512M",
+        "WP_SITEURL": "http://localhost:8889",
+        "WP_HOME": "http://localhost:8889"
+      }
+    }
+  },
+  "lifecycleScripts": {
+    "afterStart": "bash .wp-env-setup.sh"
+  }
+}
