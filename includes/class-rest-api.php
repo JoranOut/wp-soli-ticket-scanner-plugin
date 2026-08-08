@@ -63,31 +63,49 @@ class Rest_API {
 
 		register_rest_route(
 			self::NAMESPACE,
-			'/validate',
+			'/lookup',
 			array(
 				'methods'             => 'POST',
-				'callback'            => array( $this, 'validate_ticket' ),
+				'callback'            => array( $this, 'lookup_ticket' ),
 				'permission_callback' => '__return_true',
-				'args'                => array(
-					'event_id' => array(
-						'required'          => true,
-						'validate_callback' => array( $this, 'validate_event_id' ),
-						'sanitize_callback' => 'absint',
-					),
-					'attendee_id' => array(
-						'required'          => true,
-						'sanitize_callback' => 'absint',
-					),
-					'ticket_id' => array(
-						'required'          => true,
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-					'pin' => array(
-						'required'          => false,
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
+				'args'                => $this->get_ticket_args(),
 			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/checkin',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'checkin_ticket' ),
+				'permission_callback' => '__return_true',
+				'args'                => $this->get_ticket_args(),
+			)
+		);
+	}
+
+	/**
+	 * Shared argument definitions for ticket endpoints.
+	 */
+	private function get_ticket_args(): array {
+		return array(
+			'event_id' => array(
+				'required'          => true,
+				'validate_callback' => array( $this, 'validate_event_id' ),
+				'sanitize_callback' => 'absint',
+			),
+			'attendee_id' => array(
+				'required'          => true,
+				'sanitize_callback' => 'absint',
+			),
+			'ticket_id' => array(
+				'required'          => true,
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'pin' => array(
+				'required'          => false,
+				'sanitize_callback' => 'sanitize_text_field',
+			),
 		);
 	}
 
@@ -97,6 +115,28 @@ class Rest_API {
 	public function validate_event_id( $value ): bool {
 		$event = get_post( absint( $value ) );
 		return $event && 'etn' === $event->post_type;
+	}
+
+	/**
+	 * Verify PIN server-side. Returns WP_REST_Response with error on failure, or null on success.
+	 */
+	private function check_pin( \WP_REST_Request $request ): ?\WP_REST_Response {
+		$event_id   = $request->get_param( 'event_id' );
+		$pin        = $request->get_param( 'pin' );
+		$stored_pin = get_post_meta( $event_id, '_soli_scanner_pin', true );
+
+		if ( ! empty( $stored_pin ) && ( empty( $pin ) || $pin !== $stored_pin ) ) {
+			return new \WP_REST_Response(
+				array(
+					'status'   => 'error',
+					'message'  => __( 'Invalid PIN.', 'soli-ticket-scanner' ),
+					'attendee' => null,
+				),
+				403
+			);
+		}
+
+		return null;
 	}
 
 	/**
@@ -177,35 +217,41 @@ class Rest_API {
 	}
 
 	/**
-	 * POST /validate
+	 * POST /lookup — Read-only ticket info, no check-in.
 	 */
-	public function validate_ticket( \WP_REST_Request $request ): \WP_REST_Response {
-		$event_id    = $request->get_param( 'event_id' );
-		$attendee_id = $request->get_param( 'attendee_id' );
-		$ticket_id   = $request->get_param( 'ticket_id' );
-		$pin         = $request->get_param( 'pin' );
-
-		// Re-check PIN server-side if the event requires it
-		$stored_pin = get_post_meta( $event_id, '_soli_scanner_pin', true );
-		if ( ! empty( $stored_pin ) ) {
-			if ( empty( $pin ) || $pin !== $stored_pin ) {
-				return new \WP_REST_Response(
-					array(
-						'status'   => 'error',
-						'message'  => __( 'Invalid PIN.', 'soli-ticket-scanner' ),
-						'attendee' => null,
-					),
-					403
-				);
-			}
+	public function lookup_ticket( \WP_REST_Request $request ): \WP_REST_Response {
+		$pin_error = $this->check_pin( $request );
+		if ( $pin_error ) {
+			return $pin_error;
 		}
 
-		$result = $this->validator->validate_ticket( $attendee_id, $ticket_id, $event_id );
+		$result = $this->validator->lookup_ticket(
+			$request->get_param( 'attendee_id' ),
+			$request->get_param( 'ticket_id' ),
+			$request->get_param( 'event_id' )
+		);
 
-		$status_code = 200;
-		if ( 'error' === $result['status'] ) {
-			$status_code = 400;
+		$status_code = 'error' === $result['status'] ? 400 : 200;
+
+		return new \WP_REST_Response( $result, $status_code );
+	}
+
+	/**
+	 * POST /checkin — Actually check in the ticket.
+	 */
+	public function checkin_ticket( \WP_REST_Request $request ): \WP_REST_Response {
+		$pin_error = $this->check_pin( $request );
+		if ( $pin_error ) {
+			return $pin_error;
 		}
+
+		$result = $this->validator->checkin_ticket(
+			$request->get_param( 'attendee_id' ),
+			$request->get_param( 'ticket_id' ),
+			$request->get_param( 'event_id' )
+		);
+
+		$status_code = 'error' === $result['status'] ? 400 : 200;
 
 		return new \WP_REST_Response( $result, $status_code );
 	}

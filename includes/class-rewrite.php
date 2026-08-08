@@ -58,6 +58,9 @@ class Rewrite {
 			'api_base'     => rest_url( 'soli_ticket_scanner/v1' ),
 			'api_nonce'    => wp_create_nonce( 'wp_rest' ),
 			'worker_url'   => SOLI_TICKET_SCANNER__PLUGIN_DIR_URL . 'assets/js/qr-scanner-worker.min.js',
+			'i18n'         => array(
+				'checkin' => __( 'Check in', 'soli-ticket-scanner' ),
+			),
 		);
 
 		include SOLI_TICKET_SCANNER__PLUGIN_DIR_PATH . 'templates/scanner-page.php';
