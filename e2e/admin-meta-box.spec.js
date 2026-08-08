@@ -1,6 +1,13 @@
 const { test, expect } = require('@playwright/test');
 
 test.describe('Admin Scanner Fields', () => {
+	// These tests log in as the same WordPress user. Two logins running at the
+	// same time race on the user's session_tokens meta, and the loser's auth
+	// cookie is rejected — wp-admin bounces it straight back to wp-login.php.
+	// 'default' keeps them sequential in one worker (unlike 'serial', a failure
+	// does not skip the rest).
+	test.describe.configure({ mode: 'default' });
+
 	test.beforeEach(async ({ page }) => {
 		// Log in as admin
 		await page.goto('/wp-login.php');

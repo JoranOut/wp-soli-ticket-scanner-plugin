@@ -30,10 +30,11 @@ class Rest_API {
 				'methods'             => 'GET',
 				'callback'            => array( $this, 'get_event_info' ),
 				'permission_callback' => '__return_true',
+				// No validate_callback here: an unknown event in the route path is a
+				// missing resource (404 from the callback), not a malformed request.
 				'args'                => array(
 					'event_id' => array(
 						'required'          => true,
-						'validate_callback' => array( $this, 'validate_event_id' ),
 						'sanitize_callback' => 'absint',
 					),
 				),
@@ -141,10 +142,20 @@ class Rest_API {
 
 	/**
 	 * GET /event-info/{event_id}
+	 *
+	 * @return \WP_REST_Response|\WP_Error Event data, or a 404 error when the event does not exist.
 	 */
-	public function get_event_info( \WP_REST_Request $request ): \WP_REST_Response {
+	public function get_event_info( \WP_REST_Request $request ) {
 		$event_id = $request->get_param( 'event_id' );
 		$event    = get_post( $event_id );
+
+		if ( ! $event || 'etn' !== $event->post_type ) {
+			return new \WP_Error(
+				'soli_ticket_scanner_event_not_found',
+				__( 'Event not found.', 'soli-ticket-scanner' ),
+				array( 'status' => 404 )
+			);
+		}
 
 		$pin          = get_post_meta( $event_id, '_soli_scanner_pin', true );
 		$event_date   = get_post_meta( $event_id, 'etn_start_date', true );
