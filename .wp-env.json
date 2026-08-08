@@ -4,15 +4,17 @@
   "phpVersion": "8.2",
   "plugins": ["."],
   "themes": [],
+  "mappings": {
+    "wp-content/mu-plugins": "./e2e/mu-plugins",
+    "wp-content/soli-e2e": "./e2e"
+  },
   "env": {
     "development": {
       "config": {
         "WP_DEBUG": true,
         "WP_DEBUG_DISPLAY": true,
         "WP_DEBUG_LOG": true,
-        "WP_MEMORY_LIMIT": "512M",
-        "WP_SITEURL": "http://localhost:8888",
-        "WP_HOME": "http://localhost:8888"
+        "WP_MEMORY_LIMIT": "512M"
       }
     },
     "tests": {
@@ -20,9 +22,7 @@
         "WP_DEBUG": true,
         "WP_DEBUG_DISPLAY": true,
         "WP_DEBUG_LOG": true,
-        "WP_MEMORY_LIMIT": "512M",
-        "WP_SITEURL": "http://localhost:8889",
-        "WP_HOME": "http://localhost:8889"
+        "WP_MEMORY_LIMIT": "512M"
       }
     }
   },
