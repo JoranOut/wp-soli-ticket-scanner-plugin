@@ -125,6 +125,11 @@ npm run build        # Build CSS + copy JS assets
 npm run watch        # Watch CSS changes
 ```
 
+The compiled output in `assets/` is committed, because `publish.js` zips the
+working tree and does not build. Always run `npm run build` and commit `assets/`
+alongside any `src/` change — the `test` workflow rebuilds and fails if the two
+have drifted, and `nightly.yml`/`release.yml` build before packaging.
+
 ### Testing
 
 ```bash

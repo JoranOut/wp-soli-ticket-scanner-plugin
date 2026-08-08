@@ -49,6 +49,10 @@ jobs:
         if: steps.check.outputs.should_release == 'true'
         run: npm ci
 
+      - name: Build assets
+        if: steps.check.outputs.should_release == 'true'
+        run: npm run build
+
       - name: Build package
         if: steps.check.outputs.should_release == 'true'
         run: node ./publish.js

@@ -34,6 +34,9 @@ jobs:
           echo "nightly_version=${NIGHTLY_VERSION}" >> $GITHUB_OUTPUT
           echo "date=${DATE}" >> $GITHUB_OUTPUT
 
+      - name: Build assets
+        run: npm run build
+
       - name: Build package
         run: node ./publish.js
 
