@@ -5,6 +5,9 @@ on:
     branches: [main]
   push:
     branches: [main]
+  # Allows re-verifying a branch on demand, e.g. after a merge performed with
+  # GITHUB_TOKEN (which does not trigger the push event).
+  workflow_dispatch:
 
 jobs:
   test:
@@ -31,6 +34,10 @@ jobs:
 
       - name: Run Playwright tests
         run: npm run test:e2e
+        env:
+          # Chromium (the only configured project) is already installed with its
+          # system deps above; skip wp-scripts' re-download of every browser.
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 'true'
 
       - name: Upload test artifacts
         if: failure()
