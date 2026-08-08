@@ -89,10 +89,12 @@ $version    = SOLI_TICKET_SCANNER__PLUGIN_VERSION;
 								<div class="tw-flex-1 tw-min-w-0">
 									<p id="result-message" class="tw-font-bold tw-text-lg"></p>
 									<p id="result-attendee-name" class="tw-text-sm tw-truncate"></p>
-									<p id="result-ticket-type" class="tw-text-sm tw-opacity-70 tw-truncate"></p>
 								</div>
 								<button id="result-dismiss" class="tw-btn tw-btn-ghost tw-btn-sm tw-shrink-0">✕</button>
 							</div>
+							<button id="result-checkin" class="tw-btn tw-btn-neutral tw-w-full tw-mt-3 tw-hidden tw-text-lg">
+								<?php esc_html_e( 'Check in', 'soli-ticket-scanner' ); ?>
+							</button>
 						</div>
 					</div>
 				</div>

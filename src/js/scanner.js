@@ -26,13 +26,14 @@
 	const resultIcon = document.getElementById('result-icon');
 	const resultMessage = document.getElementById('result-message');
 	const resultAttendeeName = document.getElementById('result-attendee-name');
-	const resultTicketType = document.getElementById('result-ticket-type');
 	const resultDismiss = document.getElementById('result-dismiss');
+	const resultCheckin = document.getElementById('result-checkin');
 
 	let qrScanner = null;
 	let scannedCount = 0;
 	let isProcessing = false;
 	let autoResumeTimer = null;
+	let currentTicketData = null;
 	let storedPin = sessionStorage.getItem('soli_scanner_pin_' + config.event_id) || '';
 
 	// Set QR scanner worker path for UMD build
@@ -208,14 +209,15 @@
 		if (!parsed) return;
 
 		isProcessing = true;
+		currentTicketData = parsed;
 
-		// Pause scanner during validation
+		// Pause scanner during lookup
 		if (qrScanner) {
 			qrScanner.pause();
 		}
 
 		try {
-			const response = await fetch(config.api_base + '/validate', {
+			const response = await fetch(config.api_base + '/lookup', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -227,7 +229,7 @@
 			});
 
 			const result = await response.json();
-			showResult(result);
+			showLookupResult(result);
 		} catch (err) {
 			showResult({
 				status: 'error',
@@ -235,6 +237,54 @@
 				attendee: null,
 			});
 		}
+	}
+
+	function showLookupResult(result) {
+		// Clear any existing timer
+		if (autoResumeTimer) {
+			clearTimeout(autoResumeTimer);
+			autoResumeTimer = null;
+		}
+
+		// Set card style based on status
+		resultCard.className = 'tw-card tw-shadow-2xl';
+		resultIcon.innerHTML = '';
+		resultCheckin.classList.add('tw-hidden');
+
+		switch (result.status) {
+			case 'valid':
+				// Ticket is valid and ready to check in — show Check in button
+				resultCard.classList.add('tw-bg-info', 'tw-text-info-content');
+				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw-w-8 tw-h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>';
+				resultCheckin.classList.remove('tw-hidden');
+				resultCheckin.disabled = false;
+				resultCheckin.textContent = config.i18n?.checkin || 'Check in';
+				break;
+
+			case 'warning':
+				resultCard.classList.add('tw-bg-warning', 'tw-text-warning-content');
+				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw-w-8 tw-h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>';
+				break;
+
+			case 'error':
+			default:
+				resultCard.classList.add('tw-bg-error', 'tw-text-error-content');
+				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw-w-8 tw-h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>';
+				break;
+		}
+
+		// Set result text
+		resultMessage.textContent = result.message;
+
+		if (result.attendee) {
+			const name = result.attendee.name || '';
+			const type = result.attendee.ticket_type || '';
+			resultAttendeeName.textContent = type ? name + ' (' + type + ')' : name;
+		} else {
+			resultAttendeeName.textContent = '';
+		}
+
+		resultDisplay.classList.remove('tw-hidden');
 	}
 
 	function showResult(result) {
@@ -247,6 +297,7 @@
 		// Set card style based on status
 		resultCard.className = 'tw-card tw-shadow-2xl';
 		resultIcon.innerHTML = '';
+		resultCheckin.classList.add('tw-hidden');
 
 		switch (result.status) {
 			case 'success':
@@ -272,11 +323,11 @@
 		resultMessage.textContent = result.message;
 
 		if (result.attendee) {
-			resultAttendeeName.textContent = result.attendee.name || '';
-			resultTicketType.textContent = result.attendee.ticket_type || '';
+			const name = result.attendee.name || '';
+			const type = result.attendee.ticket_type || '';
+			resultAttendeeName.textContent = type ? name + ' (' + type + ')' : name;
 		} else {
 			resultAttendeeName.textContent = '';
-			resultTicketType.textContent = '';
 		}
 
 		resultDisplay.classList.remove('tw-hidden');
@@ -284,6 +335,37 @@
 		// Auto-resume on success after 3 seconds
 		if (result.status === 'success') {
 			autoResumeTimer = setTimeout(dismissResult, 3000);
+		}
+	}
+
+	async function doCheckin() {
+		if (!currentTicketData) return;
+
+		resultCheckin.disabled = true;
+		resultCheckin.classList.add('tw-loading');
+
+		try {
+			const response = await fetch(config.api_base + '/checkin', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					event_id: config.event_id,
+					attendee_id: parseInt(currentTicketData.attendee_id, 10),
+					ticket_id: currentTicketData.ticket_id,
+					pin: storedPin || undefined,
+				}),
+			});
+
+			const result = await response.json();
+			showResult(result);
+		} catch (err) {
+			showResult({
+				status: 'error',
+				message: 'Connection error. Please try again.',
+				attendee: null,
+			});
+		} finally {
+			resultCheckin.classList.remove('tw-loading');
 		}
 	}
 
@@ -295,6 +377,7 @@
 
 		resultDisplay.classList.add('tw-hidden');
 		isProcessing = false;
+		currentTicketData = null;
 
 		if (qrScanner) {
 			qrScanner.start();
@@ -304,6 +387,7 @@
 	// ─── Init ───
 
 	resultDismiss.addEventListener('click', dismissResult);
+	resultCheckin.addEventListener('click', doCheckin);
 
 	// Start the app
 	if (config.pin_required && !storedPin) {
