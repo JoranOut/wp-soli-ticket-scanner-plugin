@@ -1,21 +1,14 @@
 const { test, expect } = require('@playwright/test');
+const { ADMIN_STORAGE_STATE } = require('./helpers');
 
 test.describe('Admin Scanner Fields', () => {
-	// These tests log in as the same WordPress user. Two logins running at the
-	// same time race on the user's session_tokens meta, and the loser's auth
-	// cookie is rejected — wp-admin bounces it straight back to wp-login.php.
-	// 'default' keeps them sequential in one worker (unlike 'serial', a failure
-	// does not skip the rest).
-	test.describe.configure({ mode: 'default' });
-
-	test.beforeEach(async ({ page }) => {
-		// Log in as admin
-		await page.goto('/wp-login.php');
-		await page.fill('#user_login', 'admin');
-		await page.fill('#user_pass', 'password');
-		await page.click('#wp-submit');
-		await page.waitForURL('**/wp-admin/**');
-	});
+	// Reuse the single admin session established by auth.setup.js rather than
+	// logging in per test. Two logins as the same WordPress user race on that
+	// user's session_tokens meta, and the loser's auth cookie is rejected —
+	// wp-admin bounces it straight back to wp-login.php. Sequencing within this
+	// file was not enough once a second file also needed wp-admin, because
+	// Playwright runs files in parallel workers.
+	test.use({ storageState: ADMIN_STORAGE_STATE });
 
 	test('scanner PIN meta is registered and accessible via REST', async ({ request, page }) => {
 		// Get the test event
