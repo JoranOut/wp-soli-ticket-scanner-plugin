@@ -64,6 +64,56 @@ const PLUGIN_DIAGNOSTIC_PATTERN = new RegExp(
 );
 
 /**
+ * Reads the body text of the current page twice, for the two assertions below.
+ *
+ * DO NOT change these reads back to `innerText`. `innerText` is the *rendered*
+ * text: it skips anything in a subtree that computes to `display: none` or
+ * `visibility: hidden`. That blind spot is specific and load-bearing here —
+ * the scanner document ships `#pin-screen` and `#scanner-screen` with the
+ * `tw-hidden` class and lets JavaScript reveal the right one. A diagnostic
+ * emitted from inside either screen, which is where the template does most of
+ * its PHP work, is invisible to an `innerText` assertion and the check passes
+ * vacuously. Measured here: the same injected error produced 3 failures via
+ * `textContent` and only 2 via `innerText`.
+ *
+ * `textContent` also returns the source text of `<script>` and `<style>`
+ * elements, which `innerText` does not — and that cuts both ways, so the two
+ * patterns read different strings.
+ *
+ * `PLUGIN_DIAGNOSTIC_PATTERN` must NOT see script text. It matches within a
+ * single line (`[^\n]*`), and wp-admin prints large one-line JSON blobs into
+ * inline script, so a `Warning:` string sitting near a plugin path inside such
+ * a blob matches and turns CI red for nothing. This was demonstrated against
+ * the old single-read helper in two sibling repos; it is not hypothetical. So
+ * the path-scoped assertion reads a body clone with script/style/template/
+ * noscript stripped. Scoping the read is the right fix; loosening the pattern
+ * to tolerate script noise would blunt the diagnostic itself.
+ *
+ * `FATAL_ERROR_PATTERN` must see script text. A fatal thrown while an inline
+ * script is being printed lands inside that `<script>` node, and a stripped
+ * clone would lose it entirely. `Fatal error` / `Parse error` are also far
+ * less likely than `Warning:` to occur incidentally in script source.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @return {Promise<{full: string, markup: string}>} Full body text, and body
+ *                                                   text with script/style
+ *                                                   sources removed.
+ */
+function readBodyText( page ) {
+	return page.evaluate( () => {
+		const clone = document.body.cloneNode( true );
+		clone
+			.querySelectorAll( 'script, style, template, noscript' )
+			.forEach( ( node ) => node.remove() );
+
+		return {
+			full: document.body.textContent || '',
+			markup: clone.textContent || '',
+		};
+	} );
+}
+
+/**
  * Asserts that the currently loaded page contains no PHP diagnostics.
  *
  * `WP_DEBUG` and `WP_DEBUG_DISPLAY` are enabled for the wp-env `tests`
@@ -72,24 +122,20 @@ const PLUGIN_DIAGNOSTIC_PATTERN = new RegExp(
  * relocated into the body by the HTML parser, so reading the body catches
  * diagnostics from any point in the request.
  *
- * This reads `textContent`, not `innerText`, which is specific to this plugin:
- * the scanner document ships `#pin-screen` and `#scanner-screen` with the
- * `tw-hidden` class and lets JavaScript reveal the right one. `innerText`
- * skips hidden subtrees, so a diagnostic emitted from inside either screen —
- * which is where the template does most of its PHP work — would be invisible
- * to an `innerText` assertion and the check would silently pass.
+ * See `readBodyText()` for why this reads `textContent` and not `innerText`,
+ * and why the two assertions read different strings.
  *
  * @param {import('@playwright/test').Page} page
  */
 async function expectNoPhpDiagnostics( page ) {
 	const url = page.url();
-	const body = await page.locator( 'body' ).textContent();
+	const { full, markup } = await readBodyText( page );
 
-	expect( body, `PHP fatal/parse error rendered by ${ url }` ).not.toMatch(
+	expect( full, `PHP fatal/parse error rendered by ${ url }` ).not.toMatch(
 		FATAL_ERROR_PATTERN
 	);
 	expect(
-		body,
+		markup,
 		`PHP warning/notice/deprecation from this plugin rendered by ${ url }`
 	).not.toMatch( PLUGIN_DIAGNOSTIC_PATTERN );
 }
