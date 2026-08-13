@@ -69,9 +69,12 @@ add_action( 'init', function () {
 			'slug'               => plugin_basename( __FILE__ ),
 			'proper_folder_name' => dirname( plugin_basename( __FILE__ ) ),
 			'api_url'            => 'https://api.github.com/repos/JoranOut/wp-soli-ticket-scanner-plugin',
-			'raw_url'            => 'https://raw.github.com/JoranOut/wp-soli-ticket-scanner-plugin/main',
+			'raw_url'            => 'https://raw.githubusercontent.com/JoranOut/wp-soli-ticket-scanner-plugin/main',
 			'github_url'         => 'https://github.com/JoranOut/wp-soli-ticket-scanner-plugin',
-			'zip_url'            => 'https://github.com/JoranOut/wp-soli-ticket-scanner-plugin/archive/refs/heads/main.zip',
+			// Fallback only. The updater resolves the real download from the
+			// GitHub releases API and overrides this with the release's zip
+			// asset, which is the built tree rather than a bare branch archive.
+			'zip_url'            => 'https://github.com/JoranOut/wp-soli-ticket-scanner-plugin/releases/latest/download/wp-soli-ticket-scanner-plugin.zip',
 			'sslverify'          => true,
 			'requires'           => '6.0.0',
 			'tested'             => '6.7.0',
