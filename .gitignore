@@ -22,3 +22,6 @@ Thumbs.db
 # Claude/Playwright MCP
 .claude/
 .playwright-mcp/
+
+# Playwright saved admin session (e2e/auth.setup.js)
+e2e/.auth/

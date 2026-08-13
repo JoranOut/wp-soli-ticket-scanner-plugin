@@ -8,8 +8,11 @@
     "wp-content/mu-plugins": "./e2e/mu-plugins",
     "wp-content/soli-e2e": "./e2e"
   },
+  "port": 8906,
+  "testsPort": 8907,
   "env": {
     "development": {
+      "port": 8906,
       "config": {
         "WP_DEBUG": true,
         "WP_DEBUG_DISPLAY": true,
@@ -18,6 +21,7 @@
       }
     },
     "tests": {
+      "port": 8907,
       "config": {
         "WP_DEBUG": true,
         "WP_DEBUG_DISPLAY": true,
