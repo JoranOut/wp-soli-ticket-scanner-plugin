@@ -76,8 +76,12 @@ add_action( 'init', function () {
 			// asset, which is the built tree rather than a bare branch archive.
 			'zip_url'            => 'https://github.com/JoranOut/wp-soli-ticket-scanner-plugin/releases/latest/download/wp-soli-ticket-scanner-plugin.zip',
 			'sslverify'          => true,
-			'requires'           => '6.0.0',
-			'tested'             => '6.7.0',
+			// Both ends of the supported range are rewritten at packaging time by
+			// the nightly and release workflows, from the same two numbers
+			// test.yml runs a matrix leg against. Do not reformat: the workflows
+			// match these lines with sed.
+			'requires'           => '6.9',    // oldest branch the e2e suite covers; see package.json wordpress.requiresAtLeast
+			'tested'             => '7.0.4',  // newest release the e2e suite ran against
 			'readme'             => 'readme.md',
 		);
 
