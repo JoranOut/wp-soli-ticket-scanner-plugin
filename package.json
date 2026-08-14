@@ -20,6 +20,13 @@
     "i18n:make-mo": "wp-env run cli -- bash -c 'php -d memory_limit=512M /usr/local/bin/wp i18n make-mo wp-content/plugins/wp-soli-ticket-scanner-plugin/languages'",
     "i18n:build": "npm run i18n:make-pot && npm run i18n:make-mo"
   },
+  "engines": {
+    "node": ">=24"
+  },
+  "wordpress": {
+    "_comment": "Oldest supported WordPress branch. The e2e suite runs against the newest patch of this branch as well as the newest release, and the release workflows stamp it into the plugin's 'requires'. Raise it when production no longer runs it.",
+    "requiresAtLeast": "6.9"
+  },
   "devDependencies": {
     "@wordpress/env": "^10.14.0",
     "@wordpress/scripts": "^31.0.0",
