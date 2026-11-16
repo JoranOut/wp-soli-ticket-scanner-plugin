@@ -4,5 +4,7 @@
     "config:recommended"
   ],
   "automerge": true,
-  "minimumReleaseAge": "3 days"
+  "minimumReleaseAge": "3 days",
+  "prHourlyLimit": 0,
+  "prConcurrentLimit": 0
 }
