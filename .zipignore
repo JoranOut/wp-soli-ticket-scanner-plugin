@@ -10,7 +10,6 @@ package-lock.json
 .gitignore
 .zipignore
 playwright.config.js
-tailwind.config.js
 build.js
 
 # Source files

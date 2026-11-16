@@ -5,10 +5,10 @@
   "scripts": {
     "wp-env:start": "wp-env start --debug",
     "wp-env:stop": "wp-env stop",
-    "build:css": "npx tailwindcss -i ./src/css/scanner.css -o ./assets/css/scanner.css --minify",
+    "build:css": "tailwindcss -i ./src/css/scanner.css -o ./assets/css/scanner.css --minify",
     "build:js": "node build.js",
     "build": "npm run build:css && npm run build:js",
-    "watch": "npx tailwindcss -i ./src/css/scanner.css -o ./assets/css/scanner.css --watch",
+    "watch": "tailwindcss -i ./src/css/scanner.css -o ./assets/css/scanner.css --watch",
     "publish": "npm run build && node ./publish.js",
     "test:e2e": "wp-scripts test-playwright",
     "test:e2e:debug": "wp-scripts test-playwright --debug",
@@ -28,11 +28,12 @@
     "requiresAtLeast": "6.9"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.3.5",
     "@wordpress/e2e-test-utils-playwright": "^3.0.0",
     "@wordpress/env": "^12.1.0",
     "@wordpress/scripts": "^37.0.0",
     "archiver": "^8.0.0",
-    "daisyui": "^4.12.14",
+    "daisyui": "^5.8.0",
     "qr-scanner": "^1.4.2",
     "tailwindcss": "^4.0.0"
   }

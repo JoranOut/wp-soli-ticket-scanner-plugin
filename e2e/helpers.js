@@ -70,7 +70,7 @@ const PLUGIN_DIAGNOSTIC_PATTERN = new RegExp(
  * text: it skips anything in a subtree that computes to `display: none` or
  * `visibility: hidden`. That blind spot is specific and load-bearing here —
  * the scanner document ships `#pin-screen` and `#scanner-screen` with the
- * `tw-hidden` class and lets JavaScript reveal the right one. A diagnostic
+ * `tw:hidden` class and lets JavaScript reveal the right one. A diagnostic
  * emitted from inside either screen, which is where the template does most of
  * its PHP work, is invisible to an `innerText` assertion and the check passes
  * vacuously. Measured here: the same injected error produced 3 failures via
