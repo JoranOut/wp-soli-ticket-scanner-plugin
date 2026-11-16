@@ -44,11 +44,11 @@
 	// ─── Screen management ───
 
 	function showScreen(screen) {
-		loadingScreen.classList.add('tw-hidden');
-		pinScreen.classList.add('tw-hidden');
-		scannerScreen.classList.add('tw-hidden');
+		loadingScreen.classList.add('tw:hidden');
+		pinScreen.classList.add('tw:hidden');
+		scannerScreen.classList.add('tw:hidden');
 
-		screen.classList.remove('tw-hidden');
+		screen.classList.remove('tw:hidden');
 	}
 
 	// ─── PIN handling ───
@@ -108,8 +108,8 @@
 		if (pin.length !== 4) return;
 
 		pinSubmit.disabled = true;
-		pinSubmit.classList.add('tw-loading');
-		pinError.classList.add('tw-hidden');
+		pinSubmit.classList.add('tw:loading');
+		pinError.classList.add('tw:hidden');
 
 		try {
 			const response = await fetch(config.api_base + '/verify-pin', {
@@ -129,7 +129,7 @@
 				initScannerScreen();
 			} else {
 				pinError.textContent = data.message;
-				pinError.classList.remove('tw-hidden');
+				pinError.classList.remove('tw:hidden');
 
 				// Clear inputs
 				pinInputs.forEach(i => (i.value = ''));
@@ -137,10 +137,10 @@
 			}
 		} catch (err) {
 			pinError.textContent = 'Connection error. Please try again.';
-			pinError.classList.remove('tw-hidden');
+			pinError.classList.remove('tw:hidden');
 		} finally {
 			pinSubmit.disabled = false;
-			pinSubmit.classList.remove('tw-loading');
+			pinSubmit.classList.remove('tw:loading');
 			updatePinSubmitState();
 		}
 	}
@@ -162,12 +162,12 @@
 			);
 
 			await qrScanner.start();
-			scanOverlay.classList.remove('tw-hidden');
-			cameraError.classList.add('tw-hidden');
+			scanOverlay.classList.remove('tw:hidden');
+			cameraError.classList.add('tw:hidden');
 		} catch (err) {
 			console.error('Camera error:', err);
-			scanOverlay.classList.add('tw-hidden');
-			cameraError.classList.remove('tw-hidden');
+			scanOverlay.classList.add('tw:hidden');
+			cameraError.classList.remove('tw:hidden');
 		}
 	}
 
@@ -247,29 +247,29 @@
 		}
 
 		// Set card style based on status
-		resultCard.className = 'tw-card tw-shadow-2xl';
+		resultCard.className = 'tw:card tw:shadow-2xl';
 		resultIcon.innerHTML = '';
-		resultCheckin.classList.add('tw-hidden');
+		resultCheckin.classList.add('tw:hidden');
 
 		switch (result.status) {
 			case 'valid':
 				// Ticket is valid and ready to check in — show Check in button
-				resultCard.classList.add('tw-bg-info', 'tw-text-info-content');
-				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw-w-8 tw-h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>';
-				resultCheckin.classList.remove('tw-hidden');
+				resultCard.classList.add('tw:bg-info', 'tw:text-info-content');
+				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw:w-8 tw:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>';
+				resultCheckin.classList.remove('tw:hidden');
 				resultCheckin.disabled = false;
 				resultCheckin.textContent = config.i18n?.checkin || 'Check in';
 				break;
 
 			case 'warning':
-				resultCard.classList.add('tw-bg-warning', 'tw-text-warning-content');
-				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw-w-8 tw-h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>';
+				resultCard.classList.add('tw:bg-warning', 'tw:text-warning-content');
+				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw:w-8 tw:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>';
 				break;
 
 			case 'error':
 			default:
-				resultCard.classList.add('tw-bg-error', 'tw-text-error-content');
-				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw-w-8 tw-h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>';
+				resultCard.classList.add('tw:bg-error', 'tw:text-error-content');
+				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw:w-8 tw:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>';
 				break;
 		}
 
@@ -284,7 +284,7 @@
 			resultAttendeeName.textContent = '';
 		}
 
-		resultDisplay.classList.remove('tw-hidden');
+		resultDisplay.classList.remove('tw:hidden');
 	}
 
 	function showResult(result) {
@@ -295,27 +295,27 @@
 		}
 
 		// Set card style based on status
-		resultCard.className = 'tw-card tw-shadow-2xl';
+		resultCard.className = 'tw:card tw:shadow-2xl';
 		resultIcon.innerHTML = '';
-		resultCheckin.classList.add('tw-hidden');
+		resultCheckin.classList.add('tw:hidden');
 
 		switch (result.status) {
 			case 'success':
-				resultCard.classList.add('tw-bg-success', 'tw-text-success-content');
-				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw-w-8 tw-h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>';
+				resultCard.classList.add('tw:bg-success', 'tw:text-success-content');
+				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw:w-8 tw:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>';
 				scannedCount++;
 				scanCount.textContent = scannedCount;
 				break;
 
 			case 'warning':
-				resultCard.classList.add('tw-bg-warning', 'tw-text-warning-content');
-				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw-w-8 tw-h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>';
+				resultCard.classList.add('tw:bg-warning', 'tw:text-warning-content');
+				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw:w-8 tw:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>';
 				break;
 
 			case 'error':
 			default:
-				resultCard.classList.add('tw-bg-error', 'tw-text-error-content');
-				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw-w-8 tw-h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>';
+				resultCard.classList.add('tw:bg-error', 'tw:text-error-content');
+				resultIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="tw:w-8 tw:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>';
 				break;
 		}
 
@@ -330,7 +330,7 @@
 			resultAttendeeName.textContent = '';
 		}
 
-		resultDisplay.classList.remove('tw-hidden');
+		resultDisplay.classList.remove('tw:hidden');
 
 		// Auto-resume on success after 3 seconds
 		if (result.status === 'success') {
@@ -342,7 +342,7 @@
 		if (!currentTicketData) return;
 
 		resultCheckin.disabled = true;
-		resultCheckin.classList.add('tw-loading');
+		resultCheckin.classList.add('tw:loading');
 
 		try {
 			const response = await fetch(config.api_base + '/checkin', {
@@ -365,7 +365,7 @@
 				attendee: null,
 			});
 		} finally {
-			resultCheckin.classList.remove('tw-loading');
+			resultCheckin.classList.remove('tw:loading');
 		}
 	}
 
@@ -375,7 +375,7 @@
 			autoResumeTimer = null;
 		}
 
-		resultDisplay.classList.add('tw-hidden');
+		resultDisplay.classList.add('tw:hidden');
 		isProcessing = false;
 		currentTicketData = null;
 

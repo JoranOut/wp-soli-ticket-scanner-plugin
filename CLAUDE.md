@@ -50,7 +50,6 @@ wp-soli-ticket-scanner-plugin/
 ├── readme.md                       # Version info for updater
 ├── CLAUDE.md                       # This documentation
 ├── package.json                    # NPM dependencies
-├── tailwind.config.js              # Tailwind + DaisyUI config
 ├── playwright.config.js            # E2E test configuration
 ├── build.js                        # JS build script
 ├── .wp-env.json                    # Local dev environment
@@ -64,7 +63,7 @@ wp-soli-ticket-scanner-plugin/
 ├── templates/
 │   └── scanner-page.php            # Standalone scanner HTML page
 ├── src/
-│   ├── css/scanner.css             # Tailwind source CSS
+│   ├── css/scanner.css             # Tailwind 4 + daisyUI 5 config and source CSS (prefix tw:)
 │   └── js/
 │       ├── scanner.js              # Scanner page JS
 │       └── admin-scanner-fields.js # Admin panel JS injection
